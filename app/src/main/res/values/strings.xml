@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">FifthHomework</string>
+    <string name="users">Users</string>
+    <string name="albums">Albums</string>
+    <string name="photo">Photo</string>
+    <string name="create_post">Create POST</string>
+</resources>
