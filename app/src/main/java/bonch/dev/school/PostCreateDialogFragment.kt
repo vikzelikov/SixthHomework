@@ -8,6 +8,7 @@ import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import bonch.dev.school.MainActivity.Companion.isInternet
 import bonch.dev.school.networking.RetrofitFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,23 +28,34 @@ class PostCreateDialogFragment(context: Context) : DialogFragment() {
 
             val title = titleTextView?.text.toString()
             val body = bodyTextView?.text.toString()
-            val service = RetrofitFactory.makeRetrofitService()
-            CoroutineScope(Dispatchers.IO).launch {
-                val response = service.getPost(title, body)
-                try {
-                    withContext(Dispatchers.Main) {
-                        if (response.isSuccessful) {
-                            Toast.makeText(mainContext, "Success : ${response.code()}", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(mainContext, "Fail : ${response.code()}", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                } catch (err: HttpException) {
-                    Log.e("Retrofit", "${err.printStackTrace()}")
-                }
+
+            if (isInternet(activity as MainActivity)) {
+                sendRequest(title, body)
+            } else {
+                Toast.makeText(activity as MainActivity, "No Internet connection!", Toast.LENGTH_SHORT).show()
             }
+
+
         }
         builder.setView(inflater)
         return builder.create()
+    }
+
+    private fun sendRequest(title: String, body: String){
+        val service = RetrofitFactory.makeRetrofitService()
+        CoroutineScope(Dispatchers.IO).launch {
+            val response = service.getPost(title, body)
+            try {
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        Toast.makeText(mainContext, "Success : ${response.code()}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(mainContext, "Fail : ${response.code()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (err: HttpException) {
+                Log.e("Retrofit", "${err.printStackTrace()}")
+            }
+        }
     }
 }
